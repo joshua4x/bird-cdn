@@ -24,12 +24,17 @@ mkdir -p "$BACKUP_DIR"
 # STEP 1: Datenbank Backup
 # ============================================
 echo -e "${YELLOW}[1/6]${NC} Erstelle Datenbank-Backup..."
-docker exec cdn-postgres pg_dump -U cdn cdn > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓${NC} Datenbank-Backup erfolgreich: $BACKUP_DIR/db_backup_$TIMESTAMP.sql"
+# Prüfe ob Container läuft
+if docker ps | grep -q cdn-postgres; then
+    docker exec cdn-postgres pg_dump -U cdn cdn > "$BACKUP_DIR/db_backup_$TIMESTAMP.sql"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓${NC} Datenbank-Backup erfolgreich: $BACKUP_DIR/db_backup_$TIMESTAMP.sql"
+    else
+        echo -e "${RED}✗${NC} Datenbank-Backup fehlgeschlagen!"
+        exit 1
+    fi
 else
-    echo -e "${RED}✗${NC} Datenbank-Backup fehlgeschlagen!"
-    exit 1
+    echo -e "${YELLOW}⚠${NC} Container nicht aktiv - überspringe Datenbank-Backup"
 fi
 echo ""
 
