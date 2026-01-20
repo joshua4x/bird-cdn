@@ -378,7 +378,8 @@ async def upload_multiple_files(
                 cdn_url=cdn_url,
                 width=width,
                 height=height,
-                created_at=datetime.now()
+                created_at=datetime.now(),
+                is_active=True  # Explicitly set to ensure it's not NULL
             )
             
             db.add(db_file)
@@ -472,14 +473,15 @@ async def list_uploaded_files(
 ):
     """
     List all uploaded files
-    
+
     **Authentication required**
     """
-    query = db.query(UploadedFile)
-    
+    # Only show active files
+    query = db.query(UploadedFile).filter(UploadedFile.is_active == True)
+
     if bucket:
         query = query.filter(UploadedFile.bucket == bucket)
-    
+
     if file_type:
         query = query.filter(UploadedFile.file_type == file_type)
     
