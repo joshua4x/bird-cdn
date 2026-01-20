@@ -22,6 +22,7 @@ import StatsPage from './pages/StatsPage';
 import CachePage from './pages/CachePage';
 import AdminPage from './pages/AdminPage';
 import WatermarkPage from './pages/WatermarkPage';
+import SettingsPage from './pages/SettingsPage';
 
 const Navigation = () => {
   const location = useLocation();
@@ -164,7 +165,7 @@ function App() {
                   <Route path="/stats" element={<StatsPage />} />
                   <Route path="/watermark" element={<WatermarkPage />} />
                   <Route path="/cache" element={<CachePage />} />
-                  <Route path="/settings" element={<AdminPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
               </div>
             </div>

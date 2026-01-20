@@ -29,6 +29,12 @@ export const getBandwidth = (days = 7) => api.get(`/stats/bandwidth?days=${days}
 export const getTopFiles = (limit = 20) => api.get(`/stats/top-files?limit=${limit}`);
 export const getCachePerformance = () => api.get('/stats/cache-performance');
 
+// Auth API
+export const changePassword = (oldPassword, newPassword) => 
+  api.patch('/auth/change-password', { old_password: oldPassword, new_password: newPassword });
+export const changeUsername = (newUsername, password) => 
+  api.patch('/auth/change-username', { new_username: newUsername, password });
+
 // Upload API
 export const uploadFile = (formData) => {
   return api.post('/upload', formData, {

@@ -62,6 +62,16 @@ class APIKeyResponse(BaseModel):
     last_used_at: Optional[datetime]
 
 
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class UsernameChange(BaseModel):
+    new_username: str
+    password: str  # Confirm with password
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """
@@ -263,4 +273,74 @@ async def toggle_api_key(
         "success": True,
         "key_id": key.id,
         "is_active": key.is_active
+    }
+
+
+@router.patch("/change-password")
+async def change_password(
+    password_data: PasswordChange,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change current user's password
+    """
+    
+    # Verify old password
+    if not verify_password(password_data.old_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Old password is incorrect"
+        )
+    
+    # Update password
+    current_user.hashed_password = get_password_hash(password_data.new_password)
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": "Password changed successfully"
+    }
+
+
+@router.patch("/change-username")
+async def change_username(
+    username_data: UsernameChange,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change current user's username
+    """
+    
+    # Verify password
+    if not verify_password(username_data.password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is incorrect"
+        )
+    
+    # Check if new username already exists
+    existing_user = db.query(User).filter(User.username == username_data.new_username).first()
+    if existing_user and existing_user.id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already taken"
+        )
+    
+    # Update username
+    current_user.username = username_data.new_username
+    db.commit()
+    db.refresh(current_user)
+    
+    # Create new token with updated username
+    access_token = create_access_token(
+        data={"sub": str(current_user.id), "username": current_user.username, "role": current_user.role}
+    )
+    
+    return {
+        "success": True,
+        "message": "Username changed successfully",
+        "access_token": access_token,
+        "user": current_user
     }

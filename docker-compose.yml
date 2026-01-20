@@ -55,6 +55,7 @@ services:
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: adminpassword123
+      MINIO_BROWSER_REDIRECT_URL: ${CDN_PROTOCOL}://${CDN_DOMAIN}/minio/
     volumes:
       - ./storage/data:/data
     command: server /data --console-address ":9001"

@@ -64,7 +64,7 @@ const LoginPage = () => {
             color: '#1a202c',
             marginBottom: '8px'
           }}>
-            CDN Admin
+            Bird-CDN Admin
           </h1>
           <p style={{ color: '#718096', fontSize: '14px' }}>
             Melde dich an um fortzufahren
@@ -216,30 +216,6 @@ const LoginPage = () => {
             {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
         </form>
-
-        {/* Default Credentials Info */}
-        <div style={{
-          marginTop: '24px',
-          padding: '16px',
-          background: '#f7fafc',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0'
-        }}>
-          <p style={{
-            fontSize: '12px',
-            color: '#718096',
-            marginBottom: '8px',
-            fontWeight: '600'
-          }}>
-            Standard-Zugangsdaten:
-          </p>
-          <p style={{ fontSize: '12px', color: '#4a5568', marginBottom: '4px' }}>
-            <strong>Benutzername:</strong> admin
-          </p>
-          <p style={{ fontSize: '12px', color: '#4a5568' }}>
-            <strong>Passwort:</strong> admin123
-          </p>
-        </div>
       </div>
     </div>
   );
