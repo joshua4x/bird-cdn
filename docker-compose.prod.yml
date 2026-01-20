@@ -1,0 +1,62 @@
+name: cdn-tourdiary
+services:
+  # NGINX als CDN Edge
+  nginx-cdn:
+    extends:
+      file: docker-compose.yml
+      service: nginx-cdn
+
+  # Origin Storage
+  origin-storage:
+    extends:
+      file: docker-compose.yml
+      service: origin-storage
+
+  # Backend API
+  backend-api:
+    extends:
+      file: docker-compose.yml
+      service: backend-api
+
+  # Database
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+
+  # Redis
+  redis:
+    extends:
+      file: docker-compose.yml
+      service: redis
+
+  # Frontend
+  frontend:
+    extends:
+      file: docker-compose.yml
+      service: frontend
+
+  # Monitoring
+  prometheus:
+    extends:
+      file: docker-compose.yml
+      service: prometheus
+
+  grafana:
+    extends:
+      file: docker-compose.yml
+      service: grafana
+
+  nginx-exporter:
+    extends:
+      file: docker-compose.yml
+      service: nginx-exporter
+
+networks:
+  cdn-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  grafana-data:

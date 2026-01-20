@@ -1,0 +1,51 @@
+# Environment
+.env
+.env.local
+
+# Docker volumes
+storage/
+nginx/cache/
+
+# Logs
+*.log
+
+# Database
+postgres-data/
+
+# SSL Certificates
+ssl/*.pem
+ssl/*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Monitoring data
+prometheus-data/
+grafana-data/

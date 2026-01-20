@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # NGINX Exporter
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'nginx-cdn'
+  
+  # Backend API
+  - job_name: 'backend-api'
+    static_configs:
+      - targets: ['backend-api:8000']
+        labels:
+          service: 'cdn-backend'
+    metrics_path: '/metrics'
+  
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
