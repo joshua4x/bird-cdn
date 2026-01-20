@@ -133,6 +133,8 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.external-url=/prometheus/'
+      - '--web.route-prefix=/'
     networks:
       - cdn-network
     restart: unless-stopped
@@ -147,6 +149,8 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=redis-datasource
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - ./monitoring/grafana:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
