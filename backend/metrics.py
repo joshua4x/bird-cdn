@@ -87,6 +87,19 @@ STORAGE_SIZE = Gauge(
     ['bucket']
 )
 
+# === File Count Metrics ===
+FILES_TOTAL = Gauge(
+    'cdn_files_total',
+    'Total number of files in database',
+    ['file_type']  # image, video
+)
+
+FILES_SIZE_TOTAL = Gauge(
+    'cdn_files_size_total_bytes',
+    'Total size of all files in bytes',
+    ['file_type']  # image, video
+)
+
 # === Cache Metrics ===
 CACHE_HITS = Counter(
     'cdn_cache_hits_total',
@@ -215,3 +228,10 @@ def track_api_error(endpoint: str, error_code: int):
 def track_watermark(status: str):
     """Track watermark operation"""
     WATERMARK_OPERATIONS.labels(status=status).inc()
+
+def update_file_counts(image_count: int, video_count: int, image_size: int, video_size: int):
+    """Update file count gauges from database"""
+    FILES_TOTAL.labels(file_type='image').set(image_count)
+    FILES_TOTAL.labels(file_type='video').set(video_count)
+    FILES_SIZE_TOTAL.labels(file_type='image').set(image_size)
+    FILES_SIZE_TOTAL.labels(file_type='video').set(video_size)

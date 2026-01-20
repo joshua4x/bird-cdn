@@ -2,26 +2,70 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from contextlib import asynccontextmanager
+import asyncio
 
 from config import settings
-from database import engine, Base
+from database import engine, Base, SessionLocal
+from models import UploadedFile
 from routers import upload_v2 as upload, cache, stats, admin, purge, auth, transform, tracking, settings as settings_router, update as update_router
-from metrics import PrometheusMiddleware, metrics_endpoint
+from metrics import PrometheusMiddleware, metrics_endpoint, update_file_counts
+from sqlalchemy import func
+
+
+async def update_metrics_task():
+    """Background task to update file count metrics every 30 seconds"""
+    while True:
+        try:
+            db = SessionLocal()
+            try:
+                # Count images
+                image_stats = db.query(
+                    func.count(UploadedFile.id),
+                    func.coalesce(func.sum(UploadedFile.size), 0)
+                ).filter(UploadedFile.file_type == 'image', UploadedFile.is_active == True).first()
+
+                # Count videos
+                video_stats = db.query(
+                    func.count(UploadedFile.id),
+                    func.coalesce(func.sum(UploadedFile.size), 0)
+                ).filter(UploadedFile.file_type == 'video', UploadedFile.is_active == True).first()
+
+                update_file_counts(
+                    image_count=image_stats[0] or 0,
+                    video_count=video_stats[0] or 0,
+                    image_size=int(image_stats[1] or 0),
+                    video_size=int(video_stats[1] or 0)
+                )
+            finally:
+                db.close()
+        except Exception as e:
+            print(f"Error updating metrics: {e}")
+
+        await asyncio.sleep(30)  # Update every 30 seconds
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    print("🚀 Starting CDN Backend API...")
-    
+    print("Starting CDN Backend API...")
+
     # Create database tables
     Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created")
-    
+    print("Database tables created")
+
+    # Start background metrics task
+    metrics_task = asyncio.create_task(update_metrics_task())
+    print("Metrics update task started")
+
     yield
-    
+
     # Shutdown
-    print("👋 Shutting down CDN Backend API...")
+    metrics_task.cancel()
+    try:
+        await metrics_task
+    except asyncio.CancelledError:
+        pass
+    print("Shutting down CDN Backend API...")
 
 
 app = FastAPI(
