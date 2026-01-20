@@ -73,7 +73,7 @@ backups/
 docker cp backups/db_backup_YYYYMMDD_HHMMSS.sql cdn-postgres:/tmp/restore.sql
 
 # In Datenbank wiederherstellen
-docker exec -it cdn-postgres psql -U cdn -d cdndb -f /tmp/restore.sql
+docker exec -it cdn-postgres psql -U cdn -d cdn -f /tmp/restore.sql
 ```
 
 ### Storage wiederherstellen
@@ -113,7 +113,7 @@ Das System erstellt automatisch Backups und führt das Update durch.
 - Rollback mit Backup:
   ```bash
   # Datenbank wiederherstellen
-  docker exec -i cdn-postgres psql -U cdn -d cdndb < backups/db_backup_YYYYMMDD_HHMMSS.sql
+  docker exec -i cdn-postgres psql -U cdn -d cdn < backups/db_backup_YYYYMMDD_HHMMSS.sql
   
   # Storage wiederherstellen
   rm -rf storage/data/*

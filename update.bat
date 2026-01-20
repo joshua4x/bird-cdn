@@ -20,7 +20,7 @@ REM ============================================
 REM STEP 1: Datenbank Backup
 REM ============================================
 echo [1/6] Erstelle Datenbank-Backup...
-docker exec cdn-postgres pg_dump -U cdn cdndb > "%BACKUP_DIR%\db_backup_%TIMESTAMP%.sql"
+docker exec cdn-postgres pg_dump -U cdn cdn > "%BACKUP_DIR%\db_backup_%TIMESTAMP%.sql"
 if %ERRORLEVEL% NEQ 0 (
     echo [FEHLER] Datenbank-Backup fehlgeschlagen!
     exit /b 1
