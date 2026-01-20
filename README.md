@@ -10,7 +10,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev/)
-[![Version](https://img.shields.io/badge/Version-Beta-orange)](https://github.com/netz-sg/cdn-network)
+[![Version](https://img.shields.io/badge/Version-Beta-orange)](https://github.com/netz-sg/bird-cdn)
 
 **Status: Beta** - Core features functional, ready for testing environments. Review security checklist before production use.
 
@@ -208,8 +208,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/netz-sg/cdn-network.git
-cd cdn-network
+git clone https://github.com/netz-sg/bird-cdn.git
+cd bird-cdn
 
 # 2. Create environment configuration
 cp .env.example .env
@@ -788,8 +788,8 @@ Built with amazing open-source technologies:
 
 ## Support
 
-- [Issue Tracker](https://github.com/netz-sg/cdn-network/issues)
-- [Discussions](https://github.com/netz-sg/cdn-network/discussions)
+- [Issue Tracker](https://github.com/netz-sg/bird-cdn/issues)
+- [Discussions](https://github.com/netz-sg/bird-cdn/discussions)
 
 ---
 
