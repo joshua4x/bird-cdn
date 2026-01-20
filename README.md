@@ -44,22 +44,36 @@ docker-compose logs -f
 
 ### 2. SSL/HTTPS Setup (Production)
 
-**Für Production mit eigener Domain:**
+**🆕 Automatisches SSL-Setup:**
 
 ```bash
-# 1. Domain in .env konfigurieren
+# 1. Domain + Email in .env konfigurieren
 nano .env
 # Setze: CDN_DOMAIN=cdn.yourdomain.com
 #        LETSENCRYPT_EMAIL=your-email@example.com
+#        LETSENCRYPT_STAGING=true
 
-# 2. SSL-Setup ausführen
-./ssl-setup.sh   # Linux/Mac
-.\ssl-setup.ps1  # Windows
+# 2. Services starten (Zertifikat wird automatisch erstellt!)
+docker-compose up -d
 
-# 3. Fertig! Dein CDN läuft auf https://cdn.yourdomain.com
+# 3. Logs prüfen
+docker-compose logs -f certbot
+
+# 4. Nach erfolgreicher Zertifikat-Erstellung:
+# SSL-Config aktivieren
+sed "s/YOUR_DOMAIN_HERE/$CDN_DOMAIN/g" nginx/conf.d/cdn-ssl.conf.template > nginx/conf.d/cdn-ssl.conf
+sed -i 's/^CDN_PROTOCOL=.*/CDN_PROTOCOL=https/' .env
+
+# 5. Services neu starten
+docker-compose restart nginx-cdn backend-api
+
+# 6. Test: https://cdn.yourdomain.com/health
 ```
 
-**Details:** Siehe [SSL_SETUP.md](SSL_SETUP.md)
+**Details:**
+- 🆕 [AUTO_SSL_SETUP.md](AUTO_SSL_SETUP.md) - **Automatisches Setup (empfohlen)**
+- [SSL_QUICKSTART.md](SSL_QUICKSTART.md) - Quick Reference
+- [SSL_SETUP.md](SSL_SETUP.md) - Manuelle Anleitung mit Troubleshooting
 
 ### 3. Services
 
