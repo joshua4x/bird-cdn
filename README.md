@@ -42,7 +42,26 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-### 2. Services
+### 2. SSL/HTTPS Setup (Production)
+
+**Für Production mit eigener Domain:**
+
+```bash
+# 1. Domain in .env konfigurieren
+nano .env
+# Setze: CDN_DOMAIN=cdn.yourdomain.com
+#        LETSENCRYPT_EMAIL=your-email@example.com
+
+# 2. SSL-Setup ausführen
+./ssl-setup.sh   # Linux/Mac
+.\ssl-setup.ps1  # Windows
+
+# 3. Fertig! Dein CDN läuft auf https://cdn.yourdomain.com
+```
+
+**Details:** Siehe [SSL_SETUP.md](SSL_SETUP.md)
+
+### 3. Services
 
 Nach dem Start sind folgende Services verfügbar:
 
@@ -55,7 +74,7 @@ Nach dem Start sind folgende Services verfügbar:
 | **Grafana** | http://localhost:3001 | Monitoring (admin/admin) |
 | **Prometheus** | http://localhost:9090 | Metriken |
 
-### 3. Erste Schritte
+### 4. Erste Schritte
 
 ```bash
 # 1. MinIO Console öffnen (http://localhost:9001)

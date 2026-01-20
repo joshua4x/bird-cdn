@@ -13,9 +13,26 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/cache:/var/cache/nginx
       - ./ssl:/etc/nginx/ssl:ro
+      - ./certbot/www:/var/www/certbot:ro  # Certbot ACME Challenge
+      - ./certbot/conf:/etc/letsencrypt:ro  # Let's Encrypt Certs
     depends_on:
       - origin-storage
       - backend-api
+    networks:
+      - cdn-network
+    restart: unless-stopped
+
+  # Certbot für Let's Encrypt SSL
+  certbot:
+    image: certbot/certbot:latest
+    container_name: cdn-certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot:rw
+      - ./certbot/conf:/etc/letsencrypt:rw
+      - ./certbot/logs:/var/log/letsencrypt:rw
+    # Certbot läuft on-demand via ./ssl-setup.sh
+    # Auto-renewal via cron in entrypoint
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;'"
     networks:
       - cdn-network
     restart: unless-stopped

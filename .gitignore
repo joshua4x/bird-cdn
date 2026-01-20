@@ -16,6 +16,11 @@ postgres-data/
 ssl/*.pem
 ssl/*.key
 
+# Certbot / Let's Encrypt
+certbot/conf/
+certbot/logs/
+certbot/www/
+
 # Python
 __pycache__/
 *.py[cod]
