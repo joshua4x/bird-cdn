@@ -7,14 +7,19 @@ const UploadPage = () => {
   const [bucket, setBucket] = useState('media');
   const [folder, setFolder] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [startTime, setStartTime] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
     setResult(null);
     setError(null);
+    setUploadProgress(0);
+    setUploadSpeed(0);
   };
 
   const handleUpload = async () => {
@@ -26,6 +31,9 @@ const UploadPage = () => {
     setUploading(true);
     setError(null);
     setResult(null);
+    setUploadProgress(0);
+    setUploadSpeed(0);
+    setStartTime(Date.now());
 
     const formData = new FormData();
     formData.append('file', file);
@@ -33,13 +41,37 @@ const UploadPage = () => {
     formData.append('folder', folder);
 
     try {
-      const response = await uploadFile(formData);
+      const response = await uploadFile(formData, (percent, loaded, total) => {
+        setUploadProgress(percent);
+        
+        // Calculate upload speed
+        const elapsed = (Date.now() - startTime) / 1000; // seconds
+        if (elapsed > 0) {
+          const speedMBps = (loaded / 1024 / 1024) / elapsed;
+          setUploadSpeed(speedMBps);
+        }
+      });
+      
       setResult(response.data);
       setFile(null);
+      setUploadProgress(100);
       // Reset file input
       document.getElementById('file-input').value = '';
     } catch (err) {
-      setError(err.response?.data?.detail || 'Upload failed');
+      console.error('Upload error:', err);
+      let errorMsg = 'Upload failed';
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMsg = 'Upload timeout - file may be too large or connection too slow';
+      } else if (err.response) {
+        errorMsg = err.response.data?.detail || `Error: ${err.response.status} ${err.response.statusText}`;
+      } else if (err.request) {
+        errorMsg = 'No response from server - check your connection';
+      } else {
+        errorMsg = err.message || 'Unknown error occurred';
+      }
+      
+      setError(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -128,6 +160,49 @@ const UploadPage = () => {
           </div>
         </div>
 
+        {/* Upload Progress */}
+        {uploading && (
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              <span>Uploading... {uploadProgress}%</span>
+              <span style={{ color: '#6b7280' }}>
+                {uploadSpeed > 0 ? `${uploadSpeed.toFixed(2)} MB/s` : 'Calculating...'}
+              </span>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: '#e5e7eb',
+              borderRadius: '4px',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${uploadProgress}%`,
+                height: '100%',
+                background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                transition: 'width 0.3s ease',
+                borderRadius: '4px'
+              }} />
+            </div>
+            {file && (
+              <div style={{ 
+                fontSize: '12px', 
+                color: '#6b7280', 
+                marginTop: '8px',
+                textAlign: 'right'
+              }}>
+                {((file.size / 1024 / 1024) * (uploadProgress / 100)).toFixed(2)} MB / {(file.size / 1024 / 1024).toFixed(2)} MB
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Upload Button */}
         <button
           onClick={handleUpload}
@@ -140,7 +215,7 @@ const UploadPage = () => {
             cursor: (!file || uploading) ? 'not-allowed' : 'pointer'
           }}
         >
-          {uploading ? 'Uploading...' : 'Upload File'}
+          {uploading ? `Uploading... ${uploadProgress}%` : 'Upload File'}
         </button>
 
         {/* Success Message */}

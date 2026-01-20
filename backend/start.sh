@@ -17,4 +17,10 @@ fi
 
 # Start FastAPI application
 echo "🌐 Starting FastAPI server..."
-exec uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+# Increase limits for large file uploads:
+# --limit-max-requests 0: No request limit (default: 0)
+# --timeout-keep-alive 650: Keep-alive timeout for large uploads (10min+50s buffer)
+# --limit-concurrency 1000: Max concurrent connections
+exec uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 \
+  --timeout-keep-alive 650 \
+  --limit-concurrency 1000

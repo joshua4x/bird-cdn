@@ -35,11 +35,18 @@ export const changePassword = (oldPassword, newPassword) =>
 export const changeUsername = (newUsername, password) => 
   api.patch('/auth/change-username', { new_username: newUsername, password });
 
-// Upload API
-export const uploadFile = (formData) => {
+// Upload API with progress tracking
+export const uploadFile = (formData, onProgress) => {
   return api.post('/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+    },
+    timeout: 600000, // 10 minutes for large files
+    onUploadProgress: (progressEvent) => {
+      if (onProgress) {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        onProgress(percentCompleted, progressEvent.loaded, progressEvent.total);
+      }
     },
   });
 };
