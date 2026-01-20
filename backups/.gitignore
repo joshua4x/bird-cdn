@@ -1,0 +1,3 @@
+# Alle Backups ignorieren (große Files)
+*
+!.gitignore

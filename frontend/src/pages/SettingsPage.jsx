@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Lock, Check, AlertCircle, Globe, Shield, Server } from 'lucide-react';
+import { User, Lock, Check, AlertCircle, Globe, Shield, Server, RefreshCw, Download, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { changePassword, changeUsername } from '../api';
 import axios from 'axios';
@@ -30,10 +30,29 @@ const SettingsPage = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [savingDomains, setSavingDomains] = useState(false);
   const [loadingDomains, setLoadingDomains] = useState(true);
+  
+  // Update System State
+  const [updateInfo, setUpdateInfo] = useState(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [installingUpdate, setInstallingUpdate] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
+  const [updateError, setUpdateError] = useState('');
 
   useEffect(() => {
     loadMonitoringDomains();
+    checkForUpdates(); // Prüfe beim Laden einmalig
   }, []);
+
+  useEffect(() => {
+    // Poll update status während Installation
+    let interval;
+    if (installingUpdate) {
+      interval = setInterval(() => {
+        pollUpdateStatus();
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [installingUpdate]);
 
   const loadMonitoringDomains = async () => {
     try {
@@ -181,6 +200,73 @@ const SettingsPage = () => {
       setPasswordError(error.response?.data?.detail || 'Fehler beim Ändern des Passworts');
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const checkForUpdates = async () => {
+    setCheckingUpdate(true);
+    setUpdateError('');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/update/check', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUpdateInfo(response.data);
+    } catch (error) {
+      console.error('Error checking updates:', error);
+      if (error.response?.status === 503) {
+        setUpdateError(error.response.data.detail);
+      } else {
+        setUpdateError('Fehler beim Prüfen auf Updates');
+      }
+    } finally {
+      setCheckingUpdate(false);
+    }
+  };
+
+  const installUpdate = async () => {
+    if (!confirm('System-Update installieren? Das System wird neu gestartet.\n\nEin Backup wird automatisch erstellt.')) {
+      return;
+    }
+    
+    setInstallingUpdate(true);
+    setUpdateError('');
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/update/install', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Status polling startet durch useEffect
+    } catch (error) {
+      console.error('Error installing update:', error);
+      setUpdateError('Fehler beim Starten des Updates');
+      setInstallingUpdate(false);
+    }
+  };
+
+  const pollUpdateStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/update/status', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUpdateStatus(response.data);
+      
+      // Update abgeschlossen
+      if (!response.data.running && response.data.progress === 100) {
+        setInstallingUpdate(false);
+        setUpdateInfo({ available: false });
+        // Seite neu laden nach 3 Sekunden
+        setTimeout(() => window.location.reload(), 3000);
+      }
+      
+      // Update fehlgeschlagen
+      if (response.data.error) {
+        setUpdateError(response.data.error);
+        setInstallingUpdate(false);
+      }
+    } catch (error) {
+      console.error('Error polling update status:', error);
     }
   };
 
@@ -713,9 +799,285 @@ const SettingsPage = () => {
             </button>
           </form>
         </div>
+
+        {/* System Updates */}
+        <div className="card">
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginBottom: '20px',
+            paddingBottom: '20px',
+            borderBottom: '2px solid #e5e7eb'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <RefreshCw size={24} color="white" />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '4px' }}>
+                System Updates
+              </h2>
+              <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                Automatische Updates von GitHub
+              </p>
+            </div>
+          </div>
+
+          {updateError && (
+            <div style={{
+              padding: '12px 16px',
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '8px'
+            }}>
+              <AlertCircle size={18} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ flex: 1 }}>
+                <span style={{ color: '#dc2626', fontSize: '14px' }}>{updateError}</span>
+                {updateError.includes('Host') && (
+                  <div style={{ 
+                    marginTop: '8px', 
+                    padding: '8px',
+                    background: '#fff',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    color: '#374151'
+                  }}>
+                    <strong>💡 Manuelles Update:</strong><br/>
+                    Auf dem Server ausführen:<br/>
+                    <code style={{ 
+                      background: '#f3f4f6', 
+                      padding: '2px 6px', 
+                      borderRadius: '3px',
+                      fontFamily: 'monospace'
+                    }}>
+                      ./update.sh
+                    </code> (Linux) oder <code style={{ 
+                      background: '#f3f4f6', 
+                      padding: '2px 6px', 
+                      borderRadius: '3px',
+                      fontFamily: 'monospace'
+                    }}>
+                      update.bat
+                    </code> (Windows)
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {installingUpdate && updateStatus && (
+            <div style={{
+              padding: '20px',
+              background: '#f0f9ff',
+              border: '2px solid #bae6fd',
+              borderRadius: '12px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1' }}>
+                    {updateStatus.stage}
+                  </span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1' }}>
+                    {updateStatus.progress}%
+                  </span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '8px',
+                  background: '#e0f2fe',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${updateStatus.progress}%`,
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #0ea5e9, #0284c7)',
+                    transition: 'width 0.5s ease'
+                  }} />
+                </div>
+              </div>
+              <p style={{ fontSize: '13px', color: '#075985', margin: 0 }}>
+                ⚠️ Bitte Seite nicht schließen während des Updates
+              </p>
+            </div>
+          )}
+
+          {updateInfo && updateInfo.available ? (
+            <div>
+              <div style={{
+                padding: '16px',
+                background: '#fef3c7',
+                border: '2px solid #fcd34d',
+                borderRadius: '12px',
+                marginBottom: '20px'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginBottom: '12px'
+                }}>
+                  <Download size={20} color="#d97706" />
+                  <span style={{ 
+                    fontSize: '16px', 
+                    fontWeight: '600',
+                    color: '#92400e'
+                  }}>
+                    {updateInfo.commits_behind} neue{updateInfo.commits_behind > 1 ? '' : 's'} Update{updateInfo.commits_behind > 1 ? 's' : ''} verfügbar
+                  </span>
+                </div>
+
+                <div style={{ 
+                  maxHeight: '200px', 
+                  overflowY: 'auto',
+                  marginBottom: '16px'
+                }}>
+                  {updateInfo.commits.map((commit, idx) => (
+                    <div key={idx} style={{
+                      padding: '12px',
+                      background: 'white',
+                      borderRadius: '8px',
+                      marginBottom: '8px',
+                      fontSize: '13px'
+                    }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}>
+                        <code style={{
+                          background: '#f3f4f6',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontFamily: 'monospace'
+                        }}>
+                          {commit.hash}
+                        </code>
+                        <span style={{ color: '#6b7280' }}>
+                          {commit.date}
+                        </span>
+                      </div>
+                      <div style={{ fontWeight: '500', color: '#111827' }}>
+                        {commit.message}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
+                        von {commit.author}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={installUpdate}
+                  disabled={installingUpdate}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    background: installingUpdate ? '#d1d5db' : '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: installingUpdate ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <Download size={18} />
+                  {installingUpdate ? 'Update läuft...' : 'Update jetzt installieren'}
+                </button>
+
+                <div style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  background: '#fef2f2',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#991b1b'
+                }}>
+                  <strong>⚠️ Wichtig:</strong> Automatisches Backup wird vor dem Update erstellt. 
+                  System wird für ca. 1-2 Minuten neu gestartet.
+                </div>
+              </div>
+            </div>
+          ) : updateInfo && !updateInfo.available ? (
+            <div style={{
+              padding: '20px',
+              background: '#f0fdf4',
+              border: '2px solid #bbf7d0',
+              borderRadius: '12px',
+              textAlign: 'center',
+              marginBottom: '20px'
+            }}>
+              <Check size={32} color="#16a34a" style={{ marginBottom: '12px' }} />
+              <p style={{ 
+                fontSize: '16px', 
+                fontWeight: '600',
+                color: '#166534',
+                margin: 0
+              }}>
+                System ist auf dem neuesten Stand
+              </p>
+              {updateInfo.last_check && (
+                <p style={{ 
+                  fontSize: '13px', 
+                  color: '#15803d',
+                  marginTop: '8px'
+                }}>
+                  Letzter Check: {new Date(updateStatus?.last_check || updateInfo.last_check).toLocaleString('de-DE')}
+                </p>
+              )}
+            </div>
+          ) : null}
+
+          <button
+            onClick={checkForUpdates}
+            disabled={checkingUpdate || installingUpdate}
+            style={{
+              padding: '12px 24px',
+              background: checkingUpdate || installingUpdate ? '#d1d5db' : '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: checkingUpdate || installingUpdate ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <RefreshCw size={16} className={checkingUpdate ? 'spin' : ''} />
+            {checkingUpdate ? 'Prüfe...' : 'Jetzt auf Updates prüfen'}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default SettingsPage;
+

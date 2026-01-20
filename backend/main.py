@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from config import settings
 from database import engine, Base
-from routers import upload_v2 as upload, cache, stats, admin, purge, auth, transform, tracking, settings as settings_router
+from routers import upload_v2 as upload, cache, stats, admin, purge, auth, transform, tracking, settings as settings_router, update as update_router
 from metrics import PrometheusMiddleware, metrics_endpoint
 
 
@@ -81,6 +81,7 @@ app.include_router(stats.router, prefix="/api/stats", tags=["Statistics"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Administration"])
 app.include_router(tracking.router, prefix="/api/tracking", tags=["Tracking"])
 app.include_router(settings_router.router, prefix="/api", tags=["Settings"])
+app.include_router(update_router.router, prefix="/api", tags=["Update"])
 
 
 # Health Check

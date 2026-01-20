@@ -83,6 +83,8 @@ services:
     volumes:
       - ./nginx/cache:/var/cache/nginx
       - ./backend:/app
+      - ./backups:/app/backups  # Backup Verzeichnis
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker Zugriff für Updates
     depends_on:
       - postgres
       - redis
