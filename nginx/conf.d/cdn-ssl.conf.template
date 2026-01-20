@@ -88,9 +88,25 @@ server {
         expires 30d;
     }
 
+    # Frontend Assets (CSS, JS, etc.)
+    location /assets/ {
+        proxy_pass http://frontend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
     # Admin UI
-    location /admin/ {
-        proxy_pass http://frontend/;
+    location /admin {
+        proxy_pass http://frontend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Root - Frontend
+    location = / {
+        proxy_pass http://frontend;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
