@@ -166,12 +166,7 @@ server {
         expires 7d;
     }
 
-    # Root redirect
-    location = / {
-        return 302 /admin/;
-    }
-
-    # Default
+    # Default - CDN Storage
     location / {
         proxy_pass http://origin_storage;
         proxy_set_header Host $host;
