@@ -19,10 +19,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Application Code
 COPY . .
 
-# Make scripts executable
-RUN chmod +x /app/cron_aggregate_logs.py && \
-    chmod +x /app/setup_tracking_cron.sh && \
-    chmod +x /app/start.sh
+# Make scripts executable (force with -v for verbose output)
+RUN chmod -v +x /app/cron_aggregate_logs.py && \
+    chmod -v +x /app/setup_tracking_cron.sh && \
+    chmod -v +x /app/start.sh && \
+    ls -la /app/*.sh /app/cron_aggregate_logs.py
 
 # Create cache and log directories
 RUN mkdir -p /var/cache/nginx /var/log
@@ -34,5 +35,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Run Application
-CMD ["/app/start.sh"]
+# Run Application via bash (ensures script execution even if permissions fail)
+CMD ["bash", "/app/start.sh"]
